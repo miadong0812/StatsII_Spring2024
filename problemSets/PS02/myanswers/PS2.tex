@@ -1,0 +1,329 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{graphicx,textcomp}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage[reqno]{amsmath}
+\usepackage{amsthm}
+\usepackage{fancyvrb}
+\usepackage{amssymb,enumerate}
+\usepackage[all]{xy}
+\usepackage{endnotes}
+\usepackage{lscape}
+\usepackage{amssymb} 
+\usepackage{array} 
+\newtheorem{com}{Comment}
+\usepackage{float}
+\usepackage{hyperref}
+\newtheorem{lem} {Lemma}
+\newtheorem{prop}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{defn}{Definition}
+\newtheorem{cor}{Corollary}
+\newtheorem{obs}{Observation}
+\usepackage[compact]{titlesec}
+\usepackage{dcolumn}
+\usepackage{tikz}
+\usepackage{caption}
+\usetikzlibrary{arrows}
+\usepackage{multirow}
+\usepackage{xcolor}
+\newcolumntype{.}{D{.}{.}{-1}}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\definecolor{light-gray}{gray}{0.65}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{booktabs}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+\lstset{style=mystyle}
+\newcommand{\Sref}[1]{Section~\ref{#1}}
+\newtheorem{hyp}{Hypothesis}
+
+\title{Problem Set 2}
+\date{Due: February 18, 2024}
+\author{Yajie Dong}
+
+
+\begin{document}
+	\maketitle
+	\section*{Question 1}
+
+\noindent Please answer the following questions:
+
+ 
+	 Fit an additive model. Provide the summary output, the global null hypothesis, and $p$-value. Please describe the results and provide a conclusion.
+		%\item
+		%How many iterations did it take to find the maximum likelihood estimates?
+
+	\section*{Step 1:} \textbf{Load and explore the Dataset:} Use the provided dataset `climateSupport.RData` to load the data into R. The dataset contains observations from 8500 individuals, with the response variable being `choice` (1 if the individual supports the policy, 0 otherwise), and explanatory variables being `countries` (number of participating countries) and `sanctions` (level of sanctions for missing emission targets).
+
+Let's do that by R:
+\begin{lstlisting}[language=R]
+#  set a seed for reproducibility when doing simulations
+set.seed(123)
+# Load necessary libraries
+library(tidyverse)  # For data manipulation and visualization
+library(broom)      # For tidying up model outputs
+library(lme4)       # For fitting generalized linear mixed models (if needed)
+library(ggplot2)    # For plotting
+# Load the dataset
+load(url("https://github.com/ASDS-TCD/StatsII_Spring2024/blob/main/datasets/climateSupport.RData?raw=true"))
+# Explore the dataset (Optional)
+View(climateSupport)
+summary(climateSupport)
+# Use the summary function and capture the output
+summary_output <- capture.output(summary(climateSupport))
+ \end{lstlisting}
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Choice         & Countries                 & Sanctions \\ \midrule
+Not Supported  & 20 of 192: 4264           & None: 2119 \\
+               & 80 of 192: 2865           & 5\%: 2133 \\
+               & 160 of 192: 2840          & 15\%: 2111 \\
+Supported      &                           & 20\%: 2137 \\ \bottomrule
+\end{tabular}
+\caption{Summary of climateSupport}
+\label{tab:climate-support}
+\end{table}
+
+\newpage
+\textbf{From the data view R output we could know:}
+\begin{itemize}
+  \item The \texttt{climateSupport} dataset has 8500 observations, with 4264 not supporting and 4236 supporting the policy.
+  \item The \texttt{countries} variable has three levels: ``20 of 192'', ``80 of 192'', and ``160 of 192'', indicating the number of countries participating in the agreement.
+  \item The \texttt{sanctions} variable has four levels: ``None'', ``5\%'', ``15\%'', and ``20\%'', representing the possible sanctions for non-compliance.
+\end{itemize}
+
+
+\section*{Step 2:}
+\textbf{ Fit an Additive Model:}We’ll need to \textbf{fit a logistic regression model since the response variable is binary.} The model will assess how `countries` and `sanctions` affect the likelihood of an individual supporting the policy.
+
+Let' do that in R:
+ \begin{lstlisting}[language=R]
+# Ensure that 'countries' and 'sanctions' are factors with the correct levels
+climateSupport$countries <- as.factor(climateSupport$countries)
+climateSupport$sanctions <- as.factor(climateSupport$sanctions)
+# Fit the logistic regression model
+model <- glm(choice ~ countries + sanctions, data = climateSupport, family = binomial())
+# Summary of the model to examine coefficients and significance
+summary(model)
+  \end{lstlisting}
+  Output from R:
+\captionof{table}{Summary of the GLM Model} 
+\label{tab:model-summary}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Term          & Estimate   & Std. Error & z value & Pr(>|z|)     \\ \midrule
+(Intercept)   & -0.005665  & 0.021971   & -0.258  & 0.7965       \\
+countries.L   & 0.458452   & 0.038101   & 12.033  & $<$ 2e-16 *** \\
+countries.Q   & -0.009950  & 0.038056   & -0.261  & 0.7937       \\
+sanctions.L   & -0.276332  & 0.043925   & -6.291  & 3.15e-10 *** \\
+sanctions.Q   & -0.181086  & 0.043963   & -4.119  & 3.80e-05 *** \\
+sanctions.C   & 0.150207   & 0.043992   & 3.414   & 0.000639 *** \\ \addlinespace
+\multicolumn{5}{l}{\textit{Signif. codes:} 0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1} \\ \midrule
+\multicolumn{2}{@{}l}{Dispersion parameter for binomial family} & \multicolumn{3}{l}{taken to be 1} \\
+\multicolumn{2}{@{}l}{Null deviance} & \multicolumn{3}{l}{11783 on 8499 degrees of freedom} \\
+\multicolumn{2}{@{}l}{Residual deviance} & \multicolumn{3}{l}{11568 on 8494 degrees of freedom} \\
+\multicolumn{2}{@{}l}{AIC} & \multicolumn{3}{l}{11580} \\
+\multicolumn{2}{@{}l}{Number of Fisher Scoring iterations} & \multicolumn{3}{l}{4} \\ \bottomrule
+\end{tabular}
+
+
+
+\section*{Step 3:Analysis of Logistic Regression Model}
+
+The logistic regression model aims to predict the likelihood of an individual supporting an environmental policy based on two main factors: the number of countries participating in an international agreement and the sanctions for not adhering to the agreement.
+
+\subsection*{1. Model Summary:}
+The logistic regression model, which includes `choice` as the binary response variable (1 for support, 0 for no support), shows that the linear term for the number of participating countries (`countries.L`) and all terms for sanctions (`sanctions.L`, `sanctions.Q`, `sanctions.C`) have significant p-values, indicating a statistically significant effect on the probability of policy support. The `countries.Q` term is not significant, suggesting a linear rather than a quadratic relationship between the number of participating countries and policy support. The negative coefficients for `sanctions.L` and `sanctions.Q` indicate that higher sanctions are associated with a lower likelihood of policy support. However, the positive coefficient for `sanctions.C` introduces a non-linear component, suggesting a more complex relationship as sanctions increase.
+
+\subsection*{2. Global Null Hypothesis and P-value:}
+\begin{itemize}
+   \item The null hypothesis ($H_0: \beta_1 = \beta_2 = \ldots = 0$) suggests that none of the explanatory variables have an effect on the likelihood of policy support.
+   \item The significant reduction in deviance from the null model (11783 to 11568) upon adding the explanatory variables indicates an improved fit of the model.
+   \item The highly significant p-value for `countries.L` ($p < 2 \times 10^{-16}$) leads us to reject the null hypothesis, affirming the influence of both the number of participating countries and the level of sanctions on policy support.
+\end{itemize}
+
+\subsection*{3. Conclusion:}
+\begin{itemize}
+   \item The number of countries participating in the agreement has a positive and significant influence on the likelihood of an individual supporting the policy, with a greater effect observed as the number of participating countries increases from 20 to 160.
+   \item Sanctions for non-compliance exhibit a complex relationship with policy support, initially reducing the likelihood of support as they increase but showing a nuanced pattern due to the cubic term.
+   \item The model elucidates the significance of international cooperation and enforcement mechanisms in shaping individual support for environmental policies.
+\end{itemize}
+
+\subsection*{4.Visualization:}
+Let's do that by R:
+\begin{lstlisting}[language=R]
+#Visualization
+# Assuming 'model' is our fitted logistic regression model
+coefficients_df <- broom::tidy(model)
+ggplot(coefficients_df, aes(x = term, y = estimate, fill = p.value < 0.05)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = estimate - std.error, ymax = estimate + std.error), width = 0.2) +
+  labs(title = "Effect Sizes of Predictors on Policy Support", y = "Coefficient Estimate", x = "") +
+  scale_fill_manual(name = "Significance", values = c("TRUE" = "steelblue", "FALSE" = "grey"), labels = c("TRUE" = "Significant", "FALSE" = "Not Significant")) +
+  theme_minimal()
+
+# Generate a new dataset for predictions
+new_data <- expand.grid(countries = levels(climateSupport$countries), sanctions = levels(climateSupport$sanctions))
+new_data$predicted_prob <- predict(model, newdata = new_data, type = "response")
+
+# Plot
+ggplot(new_data, aes(x = countries, y = predicted_prob, color = sanctions, group = sanctions)) + # Added 'group = sanctions' here
+  geom_line() +
+  geom_point() +
+  labs(title = "Predicted Probability of Policy Support", y = "Predicted Probability", x = "Number of Participating Countries") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+  \end{lstlisting}
+  
+\textbf{The plots from the R output are as follows:}
+
+The provided plots reinforce the conclusions drawn from the model. The 'Effect Sizes of Predictors on Policy Support' plot visualizes the impact of each predictor on the response variable, highlighting the significance of the number of countries and sanctions. The 'Predicted Probability of Policy Support' plot illustrates the predicted probabilities of support across different levels of participating countries and sanctions, offering a clear visual interpretation of the model's predictions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{effect sizes of predictors on policy support.png}
+\caption{Effect Sizes of Predictors on Policy Support}
+\label{fig:effect-sizes}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{predicted probability of policy support.png}
+\caption{Predicted Probability of Policy Support}
+\label{fig:predicted-probability}
+\end{figure}
+
+
+	
+\section*{Question 2:If any of the explanatory variables are significant in this model, then:}
+	\begin{enumerate}
+		\item
+		\subsection*{For the policy in which nearly all countries participate [160 of 192], how does increasing sanctions from 5\% to 15\% change the odds that an individual will support the policy? (Interpretation of a coefficient)}
+  
+  The odds ratio can be calculated as follows:
+
+\textbf{\[
+\text{Odds Ratio} = \frac{\text{Odds of support at 15\% sanction}}{\text{Odds of support at 5\% sanction}}
+\]
+  Let}'s calculate odds ratio for sanctions increase from $5\%$ to $15\%$ by R:
+  \begin{lstlisting}[language=R]
+#2(a)
+# Calculate odds ratio for sanctions increase from 5% to 15% with nearly full participation
+# This needs to match the model's coefficient names.
+# First, we need to determine the coding used for the levels of sanctions
+# For example, let's say that we have the following coding:
+# None - 0, 5% - 1, 15% - 2, 20% - 3
+# We need to calculate the predicted log odds for sanctions at 5% and 15%
+
+# Data frame for prediction focusing on 160 of 192 countries participating
+predict_data <- data.frame(
+  countries = factor(rep("160 of 192", 2), levels = c("20 of 192", "80 of 192", "160 of 192")),
+  sanctions = factor(c("5%", "15%"), levels = c("None", "5%", "15%", "20%"))
+)
+
+# Calculate predicted log odds for the sanctions levels
+predicted_log_odds <- predict(model, newdata = predict_data, type = "link")
+
+# The odds at 5% sanctions level
+odds_5 <- exp(predicted_log_odds[1])
+
+# The odds at 15% sanctions level
+odds_15 <- exp(predicted_log_odds[2])
+
+# Calculate the odds ratio
+odds_ratio <- odds_15 / odds_5
+print(paste("Odds Ratio for sanctions increase from 5% to 15%: ", odds_ratio))
+  \end{lstlisting}
+\textbf{The calculated odds ratio is shown below:}
+
+\begin{verbatim}
+[1] "Odds Ratio for sanctions increase from 5% to 15%:  0.722453082248423"
+\end{verbatim}
+The odds ratio of $0.7224531$ indicates that for policies where nearly all countries participate (160 of 192), increasing sanctions from $5\%$ to $15\%$ is associated with a decrease in the odds of an individual supporting the policy by about $27.75\%$ ($1 - 0.7224531$). This suggests that higher sanctions may reduce support for the policy among individuals when a large number of countries are participating.
+		\item
+		\subsection*{What is the estimated probability that an individual will support a policy if there are 80 of 192 countries participating with no sanctions? }
+
+Let's calculate it by R:
+\begin{lstlisting}[language=R]
+# Create new data for prediction
+new_data_80_none <- data.frame(countries = factor("80 of 192", levels = levels(climateSupport$countries)),
+                               sanctions = factor("None", levels = levels(climateSupport$sanctions)))
+
+# Predict probability
+prob_support_80_none <- predict(model, newdata = new_data_80_none, type = "response")
+prob_support_80_none
+  \end{lstlisting}
+
+\textbf{The estimated probability result from R we get:$0.5159191$}
+
+The predicted probability of $0.5159191$ suggests that when $80$ of $192$ countries are participating and there are no sanctions, an individual has about a $51.59\%$ chance of supporting the policy. This indicates a\textbf{ slightly higher }than even chance of support in this scenario.
+
+  
+		\item
+		\subsection*{Would the answers to 2a and 2b potentially change if we included the interaction term in this model? Why?}
+		\begin{itemize}
+			\item Perform a test to see if including an interaction is appropriate.
+		\end{itemize}
+	\end{enumerate}
+ The significance of the interaction term can be tested with an ANOVA between the model without the interaction term and one with it. This is performed to see if the model with the interaction term fits the data significantly better.
+
+ Now let's do that by R:
+ \begin{lstlisting}[language=R]
+#2(c)
+# Fit a model with interaction terms
+interaction_model <- glm(choice ~ countries * sanctions, data = climateSupport, family = binomial())
+
+# ANOVA to compare models
+anova_test <- anova(model, interaction_model, test = "Chisq")
+anova_test
+\end{lstlisting}
+The result from R output:	
+\begin{table}[ht]
+\centering
+\caption{Analysis of Deviance Table}
+\label{tab:anova-test}
+\begin{tabular}{@{}lccccr@{}}
+\toprule
+Model & Resid. Df & Resid. Dev & Df & Deviance & Pr(>\(\chi^2\)) \\ \midrule
+1: choice \textasciitilde{} countries + sanctions & 8494 & 11568 & & & \\
+2: choice \textasciitilde{} countries \(*\) sanctions & 8488 & 11562 & 6 & 6.2928 & 0.3912 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+
+
+The ANOVA test comparing the model without the interaction term (Model 1) to the model with the interaction term (Model 2) shows a p-value of 0.3912 for the addition of the interaction terms. This p-value is not statistically significant at the common alpha level of 0.05, suggesting that the interaction between the number of participating countries and the level of sanctions does not significantly improve the model's fit to the data. Therefore, based on this analysis, including the interaction term in the model may not be necessary, and the answers to parts 2(a) and 2(b) are unlikely to change significantly if the interaction term were included.
+
+This comprehensive analysis provides valuable insights into how the number of participating countries and the level of sanctions influence individual support for the policy. It also highlights the importance of testing for interaction effects to understand if the influence of one predictor on the outcome depends on the level of another predictor. However, in this case, the interaction does not appear to be significant.
+
+
+\end{document}
