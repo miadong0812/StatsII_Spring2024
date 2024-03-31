@@ -1,0 +1,660 @@
+
+\documentclass[aspectratio=169,10pt,compress]{beamer}
+
+% Slide theme - This is the background format
+% Warsaw theme modified UNAL 2023 - Do not modify
+\usetheme{Warsaw}
+
+% Presentation font Ancizar Sans UNAL
+% To use this compilation in Overleaf, use the XeLaTeX or LuaLaTeX compiler!!
+% Menu -> Compiler -> XeLaTeX or LuaLaTeX
+
+% Definition of Ancizar Sans font
+\usepackage{fontspec}
+  \usefonttheme{serif}
+  \setmainfont{AncizarSans}[Path=./AncizarSans/,Scale=1,Extension=.otf,UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic]
+
+% Inserts links and hyperlinks to the document
+\usepackage{hyperref}
+
+% Document language
+% Use main for the main language of the document
+\usepackage[main=english,spanish,german,french,portuguese]{babel} 
+
+% Bibliography font format
+% Using BibLaTeX package
+% Normal citation with \cite[page]{} and parenthesis citation with \parencite[page]{}
+% Complete citation with \footfullcite{}
+
+% biblatex configuration
+\usepackage[backend=biber,style=authoryear,maxcitenames=2,maxbibnames=99,giveninits=true,uniquename=false,natbib=true,doi=true,url=false]{biblatex}
+\addbibresource{biblio.bib}
+
+% Change bibliography references language to Spanish
+\DefineBibliographyStrings{english}{%
+  andothers = {\textit{et}\addabbrvspace \textit{al}\adddot},
+  andmore = {\textit{et}\addabbrvspace \textit{al}\adddot},
+}
+
+% Customize the format of citations and bibliography
+\DeclareNameAlias{sortname}{family-given}
+\DeclareFieldFormat{year}{\textbf{#1}}
+\DeclareDelimFormat{multinamedelim}{\addcomma\space}
+\DeclareDelimFormat{finalnamedelim}{\addcomma\space\&\space}
+\DeclareFieldFormat{journaltitlecase}{\titlecase{#1}}
+\DeclareFieldFormat{volume}{#1}
+\DeclareFieldFormat{pages}{pp.\space{#1}}
+\renewbibmacro{in:}{}
+\AtEveryBibitem{\clearfield{month}}
+\AtEveryBibitem{\clearfield{ISBN}}
+% Modify the citation format
+\DeclareCiteCommand{\footfullcite}
+{\usebibmacro{prenote}}
+{%
+  \ifentrytype{article}
+    {\printnames{author}.\space%
+     \printfield{year}.\space%
+     \printfield{journaltitle}\addperiod\space%
+     \textbf{\emph{\printfield{volume}}}\addperiod\space%
+     \printfield{pages}\addperiod}
+    {\ifentrytype{book}
+       {\printnames{author}.\space%
+        \printfield{year}.\space%
+        \emph{\printfield{title}}\addperiod\space%
+        \printfield{publisher}\addperiod}
+       {\ifentrytype{incollection}
+          {\printnames{author}.\space%
+           \printfield{year}.\space%
+           \emph{\printfield{title}}\addperiod\space%
+           In: \printnames{editor}\addcomma\addspace%
+           \printfield{booktitle}\addperiod\space%
+           \printfield{publisher}\addperiod}
+          {}}}}
+{\addsemicolon\addspace}
+{\usebibmacro{postnote}}
+
+% Other packages
+\usepackage{graphicx,lipsum,xcolor,array}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[absolute,overlay]{textpos} % Inserts objects with absolute coordinates
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Define the R style for listings
+\lstset{language=R,
+    basicstyle=\small\ttfamily,
+    stringstyle=\color{red},
+    otherkeywords={0,1,2,3,4,5,6,7,8,9},
+    morekeywords={TRUE,FALSE},
+    deletekeywords={data,frame,length,as,character},
+    keywordstyle=\color{blue},
+    commentstyle=\color{blue},
+}
+
+% Last page or slide number
+\usepackage{lastpage}
+
+% Slide numbering
+% Makes the numbering depend only on \frame not on the document's animations
+\renewcommand{\thepage}{\insertframenumber}
+
+% Space between paragraphs
+\usepackage{parskip}
+\setlength{\parskip}{\baselineskip}
+
+% Special and flexible tables that allow nesting
+\usepackage{tabu}
+\usepackage{tabularx}
+
+% Allows customization of vertical alignment through boxes
+\usepackage{adjustbox}
+
+% Generates color clouds
+\usepackage[most]{tcolorbox}
+
+% Allows use of multiple rows and columns in tables
+\usepackage{multirow}
+\usepackage{multicol}
+
+%
+
+
+\newcommand{\angstrom}{\textup{\AA}}
+\newcommand{\grad}{$^{\circ}$}
+
+% Adjust text alignment
+\usepackage{ragged2e}
+
+% For custom font sizes not preset
+\newcommand{\ftiny}[1]{{\fontsize{2.5}{4}\selectfont #1}} 
+\newcommand{\fnormal}[1]{{\fontsize{11}{4}\selectfont #1}} 
+
+% Custom colors
+\usepackage{colortbl}
+% Defines colors in RGB
+% UNAL colors
+\definecolor{darkvioletun}{rgb}{0.07,0.05,0.16}
+\definecolor{violeta}{rgb}{0.15,0.11,0.29}
+\definecolor{verde}{rgb}{0.11,0.59,0.53}
+\definecolor{crema}{rgb}{0.96,0.93,0.82}
+\definecolor{rojounal}{rgb}{0.77,0.27,0.27}
+\definecolor{azulunal}{rgb}{0,0.37,0.45}
+\definecolor{morado}{rgb}{0.31,0.09,0.28}
+\definecolor{aguamarinaun}{rgb}{0.11,0.60,0.53}
+\definecolor{amarillounal}{rgb}{0.90,0.74,0.27}
+% For more colors use the command \definecolor{}{}{}
+% Color guide at http://latexcolor.com/
+% RGB is on a decimal scale where 0 is 0 and 1 is 255
+
+% Change here to customize the color with the available themes
+% Themes for the slide color in the colors folder
+\input{00Colors/colorunalclaro02}
+
+% Commands for the authorship page
+\newcommand{\studentname}{}
+\newcommand{\submissiondate}{}
+\newcommand{\academictitle}{}
+\newcommand{\resgroupone}{}
+\newcommand{\resgrouptwo}{}
+\newcommand{\researchtopic}{}
+\newcommand{\thesisname}{}
+\newcommand{\thesissubtitle}{}
+\newcommand{\director}{}
+\newcommand{\codirector}{}
+\newcommand{\department}{}
+\newcommand{\faculty}{}
+
+% Set the work title, author's name, and academic title
+% Fill in the data here for automatic loading and application in the slides
+\renewcommand{\studentname}{Student Name}
+\renewcommand{\thesisname}{Work Title}
+\renewcommand{\thesissubtitle}{Subtitle}
+\renewcommand{\submissiondate}{01. 01. 2029} % Presentation date
+\renewcommand{\director}{Work Director}
+\renewcommand{\codirector}{Co-director (If applicable)}
+\renewcommand{\academictitle}{Title (Master's, Doctorate)}
+\renewcommand{\resgroupone}{Research Group 01}
+\renewcommand{\resgrouptwo}{Research Line}
+\renewcommand{\department}{Department}
+\renewcommand{\faculty}{Faculty}
+
+% Allows including chemical mechanisms and reactions
+\usepackage{chemformula}
+\usepackage{graphicx,chemfig,tikz}
+
+\usetikzlibrary{calc,arrows.meta}% for right to e left to
+\tikzset{
+    myedge/.style={->, -{Latex[#1]}}
+}
+
+% Font size in the table of contents
+\setbeamerfont{section in toc}{size=\scriptsize}
+\setbeamerfont{subsection in toc}{size=\scriptsize}
+\setbeamerfont{subsubsection in toc}{size=\scriptsize}
+
+% Limits the number of items in the table of contents
+% 2 leaves the section and subsection
+\setcounter{tocdepth}{2}
+
+% Highlights sections in the table of contents
+\AtBeginSection[]
+{
+    % This line makes the section separator not count in the slide number
+    \addtocounter{framenumber}{-1}
+    
+    \frame[plain]{
+        % Allows using an image as decoration on section separator slides
+        Insert image here \vspace{0.5cm} \\
+        %\includegraphics[width=\paperwidth]{}
+        \centering
+        \Huge \bfseries \thesection \: \insertsection
+    }                
+}
+
+% Title page
+\title{Replication:Becker, B., 2024. International inequality and demand for redistribution in the Global South. \textit{Political Science Research and Methods,} 12, pp.407-415.}
+
+\author{Yajie Dong}
+
+\date{29.03.2024}
+
+\begin{document}
+
+% Resets the slide counter to zero for the title page
+\addtocounter{framenumber}{-1}
+\frame[plain]{\titlepage}
+
+\begin{frame}
+\centering
+\LARGE{\textbf{Roadmap}}
+\end{frame}
+
+
+\begin{frame}{Presentation Roadmap}
+    \begin{enumerate}
+        \item \textbf{Introduction of the Paper}
+        \begin{itemize}
+            \item Overview of the research theme and the pivotal questions the paper addresses.
+            \item Presentation of the core hypotheses: H1 , H2 , H3.
+            \item Summary of the key findings that highlight the paper's contributions to the field.
+            \item Examination of the dataset and methods used for analysis.
+        \end{itemize}
+        \item \textbf{Replication of the Paper}
+        \begin{itemize}
+            \item Detailed replication of the original study’s quantitative findings to deepen our understanding and verify the results.
+        \end{itemize}
+     
+    \end{enumerate}
+\end{frame}
+\begin{frame}{Presentation Roadmap}
+    \begin{enumerate}
+        \setcounter{enumi}{2} % Continue numbering
+        \item \textbf{Extension Part}
+        \begin{itemize}
+            \item Extending the study by applying binary logistic regression to Table 2.
+            \item Introduction of a new hypothesis on education and inequality.
+            
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+\centering
+\LARGE{\textbf{Introduction of the Paper}}
+\end{frame}
+
+
+\begin{frame}{Introduction of the Paper:Research Question}
+  \begin{columns}[onlytextwidth,T]
+    \column{0.65\textwidth}
+    \hspace*{1cm} % Left margin
+    \begin{minipage}{\dimexpr\textwidth-2cm} % Reduces the effective text width by the margin
+    \vspace{1cm} % Top margin
+    \textbf{How do perceptions of international inequality influence attitudes toward inequality and redistribution in recipient countries of the Global South? }Specifically, it explores the relationship between Kenyans' perceptions of international income differences and their attitudes towards international aid, an instrument for redistribution.
+
+    \vspace{3mm} % Adds a small vertical space
+    \textbf{Independent Variable (X):} Perceptions of international inequality.
+
+    \vspace{3mm} % Adds a very small vertical space
+    \textbf{Dependent Variables (Y):}
+    \begin{itemize}
+      \item Attitude toward international inequality.
+      \item Demand for international redistribution.
+    \end{itemize}
+    \vspace{1cm} % Bottom margin
+    \end{minipage}
+
+    \column{0.35\textwidth}
+    \vfill % Pushes the block to the bottom
+    \setlength{\fboxrule}{0.5pt} % Thickness of the frame
+    \setlength{\fboxsep}{2pt} % Padding between the image and the frame
+    \fbox{\includegraphics[width=\textwidth,height=3.5cm,keepaspectratio]{rich_and_poor.png}} % Keeps aspect ratio
+    \captionof{figure:}{The gap between rich and poor.}
+    \vspace*{1cm} % Space below the figure
+  \end{columns}
+  \footnotetext{Source: \url{https://kenyanwallstreet.com/higher-taxes-kenyas-rich-can-lower-extreme-inequality-oxfam/}}
+\end{frame}
+
+\begin{frame}{Introduction of the Paper:Hypotheses}
+  \begin{enumerate}
+    \item The higher individuals perceive between-country inequality to be, the less accepting they are of the status quo.
+    \item The higher individuals perceive between-country inequality to be, the more they demand international redistribution.
+    \item The higher individuals perceive between-country inequality to be, the more they demand international redistribution from former colonial powers.
+  \end{enumerate}
+\end{frame}
+\begin{frame}{Introduction of the Paper:Key Contributions}
+  \begin{itemize}
+    \item \textbf{Underestimation of Inequality:} The study sheds light on the Global South's perception, particularly in Kenya, about international income differences.
+    \item \textbf{Impact of Information:} Presentation of factual data significantly decreases the acceptance of inequality among Kenyan respondents.
+    \item \textbf{Aid Demand Complexity:} Counter to conventional beliefs, enhanced awareness does not straightforwardly lead to a greater demand for international aid.
+    \item \textbf{Methodological Innovation:} The adoption of SMS-based surveys in the study paves the way for cost-effective and broad-reaching data gathering in challenging research contexts.
+    \item \textbf{Impetus for Further Research:} The findings suggest a need for more in-depth analysis into attitudes towards various forms of international redistribution, extending beyond traditional aid.
+  \end{itemize}
+\end{frame}
+
+ \begin{frame}{Introduction of the Paper:Data Review}
+  \hspace*{1cm} % Left margin
+  \begin{minipage}{\dimexpr\textwidth-2cm} % Reduces the effective text width by the left margin
+    \vspace{1cm} % Top margin
+    A pre-registered SMS survey conducted in Kenya provided insights into citizens' perceptions of international income differences and their preferences for redistribution. The survey specifically addressed:
+
+    \begin{itemize}
+      \item Comparative living standards within the country, ranging from "Much lower" (1) to "Much higher" (5).
+      \item Frequency of religious service attendance, from "Never" (1) to "Every day" (5).
+      \item According to official statistics by the World Bank, average incomes in Western Europe are 25 times higher than in Kenya. [RANDOMIZED TREATMENT]
+      \item Levels of agreement with statements regarding the acceptability of income differences and the demand for financial aid from countries like the UK and USA, rated from "Strongly disagree" (1) to "Strongly agree" (5).
+    \end{itemize}
+
+    These questions aimed to gauge the subjective and objective understanding of international economic disparities and the subsequent effect on attitudes towards international aid and inequality.
+
+    \vspace{1cm} % Bottom margin
+  \end{minipage}
+  \hspace*{-1cm} % Reset the margin so it doesn't affect the next slide
+\end{frame}
+\begin{frame}{Data Review}
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{datareview.png}
+    \caption{Dataset snapshot showcasing respondents' views on living standards, religious attendance, income disparities, and attitudes towards aid.}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+\centering
+\LARGE{\textbf{Replication of the Paper}}
+\end{frame}
+
+
+      
+ \begin{frame}{Replication: Attitudes Toward Inequality and Demand for Aid}
+  \begin{columns}
+    \column{0.45\textwidth} % Reduced width of the text column
+    \hspace*{1.5cm} % Add left margin space before the text content
+    \begin{minipage}{\dimexpr\linewidth-2cm} % Adjust the text width
+       The data visualization reflects the distribution of opinions on whether such inequality is acceptable and whether there should be increased aid from countries like the UK and the USA. Differences in the acceptance of inequality and the demand for international aid are evident, with nuances in opinion possibly relating to the country of aid origin.
+    \end{minipage}
+
+    \column{0.50\textwidth} % Adjusted width of the image column
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{figure1.png} % Make sure the path to your image is correct
+      \caption{Aggregate frequencies of attitudes towards inequality acceptance and demand for aid from the UK and USA.}
+    \end{figure}
+  \end{columns}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{Replication:Table 1: OLS Regression Models}
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{Table1.png}
+    \caption{OLS Estimates of Treatment Effects on Inequality Acceptance and Demand for Aid.}
+  \end{figure}
+  
+  \begin{lstlisting}[language=R]
+# OLS regression models
+mod01 <- lm(incdiff ~ ineqtreat, DAT)
+mod02 <- lm(aid ~ ineqtreat, DAT)
+mod03 <- lm(aidUK ~ ineqtreat, DAT)
+mod04 <- lm(aidUS ~ ineqtreat, DAT)
+mod05 <- lm(aidUK - aidUS ~ ineqtreat, DAT)
+  \end{lstlisting}
+  
+  \footnotetext{Note: *p<0.05 indicates statistical significance.}
+\end{frame}
+\begin{frame}[fragile]{Replication:Table 2: Linear Probability Models}
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{Table2.png}
+    \caption{Linear Probability Estimates of Dichotomized Treatment Effects.}
+  \end{figure}
+  
+  \begin{lstlisting}[language=R]
+# Linear Probability Models
+mod01 <- lm(I(incdiff < 3) ~ ineqtreat, DAT)
+mod02 <- lm(I(aid > 3) ~ ineqtreat, DAT)
+mod03 <- lm(I(aidUK > 3) ~ ineqtreat, DAT)
+mod04 <- lm(I(aidUS > 3) ~ ineqtreat, DAT)
+mod05 <- lm(I(aidUK - aidUS > 0) ~ ineqtreat, DAT)
+  \end{lstlisting}
+  
+  \footnotetext{Note: *p<0.05 indicates statistical significance.}
+\end{frame}
+\begin{frame}{Replication:Interpreting Regression Results}
+  \begin{itemize}
+    \item \textbf{Inequality Acceptance:}
+      \begin{itemize}
+        \item The treatment reduced inequality acceptance, consistent with H1.
+        \item Significance suggests information impacts perceptions of inequality.
+      \end{itemize}
+    \item \textbf{Demand for Aid:}
+      \begin{itemize}
+        \item No significant effect from the treatment on aid demand from either the UK or USA.
+        \item Findings imply a more complex decision-making process for aid demand.
+      \end{itemize}
+    \item \textbf{Dichotomized Variables Analysis:}
+      \begin{itemize}
+        \item Further supports increased opposition to inequality with information.
+        \item LPM confirms lack of significant change in aid demand.
+      \end{itemize}
+    
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Replication:Visual Analysis: Perceived Inequality and Attitudinal Shifts}
+  \begin{columns}[T] % Top alignment for both columns
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item The histograms show perceptions of inequality with varying attitudes towards acceptance and aid demand.
+        \item The regression line for perceived inequality versus inequality acceptance suggests a negative correlation.
+        \item There is no clear relationship between perceived inequality and aid demand, indicating other factors at play.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{Figure2.png}
+        \caption{Distributions and Regression Lines: Perceived Inequality vs. Acceptance and Aid Demand.}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+\begin{frame}[fragile]{Replication:Table 3: Treatment Effects by Dosage - R Code}
+  \frametitle{Replication:Table3:Examining Information Dosage Effects}
+  
+  \begin{itemize}
+    \item Examines the effect of the amount of information on attitudes.
+  \end{itemize}
+  
+  \begin{lstlisting}[language=R]
+# Regression models with interaction for treatment dosage
+mod01 <- lm(incdiff ~ ineqtreat * guess_recode, DAT)
+mod02 <- lm(aid ~ ineqtreat * guess_recode, DAT)
+mod03 <- lm(aidUK ~ ineqtreat * guess_recode, DAT)
+mod04 <- lm(aidUS ~ ineqtreat * guess_recode, DAT)
+mod05 <- lm(aidUK - aidUS ~ ineqtreat * guess_recode, DAT)
+  \end{lstlisting}
+  
+  % Include the image of Table 3 if needed, adjust the size to your preference
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,height=0.5\textheight,keepaspectratio]{Table3.png}
+    \caption{Treatment Effects by Dosage (OLS)}
+  \end{figure}
+\end{frame}
+\begin{frame}[fragile]{Replication:Table 4: Treatment Effect Heterogeneity - R Code}
+  \frametitle{Replication:Table 4:Effects Across Economic Standing and Religiosity}
+  
+  \begin{itemize}
+    \item Assesses how economic status and religiosity affect the treatment impact.
+  \end{itemize}
+  
+  \begin{lstlisting}[language=R]
+# Regression models with interaction for economic standing and religiosity
+mod01 <- lm(incdiff ~ ineqtreat * living, DAT)
+mod02 <- lm(aid ~ ineqtreat * living, DAT)
+mod03 <- lm(incdiff ~ ineqtreat * relig, DAT)
+mod04 <- lm(aid ~ ineqtreat * relig, DAT)
+  \end{lstlisting}
+  
+  % Include the image of Table 4 if needed, adjust the size to your preference
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,height=0.55\textheight,keepaspectratio]{Table4.png}
+    \caption{Treatment Effect Heterogeneity (OLS)}
+  \end{figure}
+\end{frame}
+\begin{frame}{Replication:Interpreting the Effects of Treatment Dosage and Heterogeneity}
+  \begin{itemize}
+    \item The level of information provided (treatment dosage) did not significantly alter inequality acceptance or aid demand.
+    \item Economic status does not uniformly influence attitudes, suggesting nuanced individual-level variations.
+    \item Religiosity's interaction with treatment increases demand for aid, indicating different impacts across religious beliefs.
+    \item These findings point to the complexity of socioeconomic factors in shaping attitudes towards inequality and aid.
+  \end{itemize}
+\end{frame}
+\begin{frame}
+\centering
+\LARGE{\textbf{Extension}}
+\end{frame}
+
+
+\begin{frame}[fragile]{Logistic Regression Analysis R Code}
+  \frametitle{Extension:R Code for Binary Logistic Regression Model (Comparative Analysis with Table 2's Linear Probability Model)}
+
+  \begin{lstlisting}[language=R]
+# Set up binary variables for logistic regression
+DAT$incdiff_binary <- factor(DAT$incdiff < 3)
+DAT$aid_binary <- factor(DAT$aid > 3)
+DAT$aidUK_binary <- factor(DAT$aidUK > 3)
+DAT$aidUS_binary <- factor(DAT$aidUS > 3)
+DAT$aid_diff_binary <- factor(DAT$aidUK - DAT$aidUS > 0)
+
+# Fit GLM models for binary dependent variables
+mod01_glm <- glm(incdiff_binary ~ ineqtreat, family=binomial(link="logit"), data=DAT)
+mod02_glm <- glm(aid_binary ~ ineqtreat, family=binomial(link="logit"), data=DAT)
+mod03_glm <- glm(aidUK_binary ~ ineqtreat, family=binomial(link="logit"), data=DAT)
+mod04_glm <- glm(aidUS_binary ~ ineqtreat, family=binomial(link="logit"), data=DAT)
+mod05_glm <- glm(aid_diff_binary ~ ineqtreat, family=binomial(link="logit"), data=DAT)
+  \end{lstlisting}
+\end{frame}
+\begin{frame}{Logistic Regression Analysis Output}
+  \frametitle{Extension:Binary Logistic Regression Model Output from R}
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{table5.png}
+    \caption{Comparative Model Output for Binary Dependent Variables}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Interpreting Logistic Regression Results}
+  \frametitle{Extension:Insights from Binary Logistic Regression Model}
+  
+  \begin{itemize}
+    \item The logistic regression provides a nuanced understanding of the treatment effects.
+    \item Treatment significantly increases the probability of opposing inequality, aligning with Hypothesis 1.
+    \item The lack of significant change in aid demand across both models suggests complex underlying dynamics influencing aid preferences.
+  \end{itemize}
+\end{frame}
+\begin{frame}{Extension:Residuals Analysis for LM Model Fit (Table 2)}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \includegraphics[width=\linewidth]{residuals for linear regression.png}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item Residual plots for each model help check the assumptions of linear regression.
+        \item Ideally, residuals should be randomly distributed with no clear pattern.
+        \item Patterns in the plots may indicate model misspecification or need for a different modeling approach.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+\begin{frame}{Extension:ROC Curves for Classification Effectiveness(Binary Logistic Regression)}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \includegraphics[width=\linewidth]{roc for 01-05.png}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item ROC curves evaluate the diagnostic ability of binary classifiers.
+        \item A curve closer to the top-left corner indicates a more effective model.
+        \item The area under the ROC curve (AUC) quantifies the overall performance of the models.
+       ( Model 1: AUC = 0.544
+        Model 2: AUC = 0.5041
+        Model 3: AUC = 0.5176
+        Model 4: AUC = 0.5065
+        Model 5: AUC = 0.5336)
+        (AUC values closer to 1 indicate a good model. Values below 0.7 typically indicate poor discrimination)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+\begin{frame}{Extension:Predicted Probabilities Distribution(Binary Logistic Regression)}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \includegraphics[width=\linewidth]{glm probabilities.png}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{itemize}
+        \item Distributions of predicted probabilities for binary outcomes from GLM.
+        \item Probabilities close to 0 or 1 suggest a strong predictive model.
+        \item Wide distributions can indicate uncertainty in the model's predictions.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+\begin{frame}{Conclusion: Synthesizing Findings and Model Performance}
+  \frametitle{Extension:Comparative Insights from Linear Probability and Logistic Regression Models}
+  
+  \begin{itemize}
+    \item Extension analysis utilizes logistic regression to explore factors affecting inequality acceptance and aid demand.
+    \item Model diagnostics alongside ROC curves evaluated the suitability of GLM for binary outcomes.
+    \item Predicted probabilities from GLM demonstrate the model’s varying confidence levels in classifying outcomes.
+    \item The detailed examination of socio-economic influences elucidates the complex nature of public responses to information on inequality.
+    
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]{Table 6: GLM Model Summary and R Code}
+  \frametitle{Extension:A new hypothesis:Higher education would lead to less acceptance of inequality. }
+
+  % GLM R code for educational impact on inequality acceptance
+  
+  
+  \begin{lstlisting}[language=R]
+DAT$ineqtreat <- factor(DAT$ineqtreat)
+DAT$incdiff_binary <- factor(DAT$incdiff < 3, labels = c("0", "1"))
+mod01 <- glm(ineqtreat ~ incdiff_binary + edu_low + edu_high, 
+             family = binomial, data = DAT)
+summary(mod01)
+  \end{lstlisting}
+  
+  % Include the image of Table 6
+  \begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{table6.png} % Adjust scale as needed
+  \caption{GLM Model Summary with Education Variables}
+\end{figure}
+\end{frame}
+\begin{frame}[fragile]{Table 7: Odds Ratios and R Code}
+  \frametitle{Extension:Odds Ratios for Education Levels on Inequality Acceptance}
+
+  % R code for calculating and displaying odds ratios
+  \begin{lstlisting}[language=R]
+# Calculate odds ratios and confidence intervals
+odds_ratios <- exp(coef(mod01))
+conf_int <- exp(confint(mod01))
+
+cbind(odds_ratios, conf_int)
+  \end{lstlisting}
+
+  % Include the image of Table 7
+  \begin{figure}
+  \centering
+  \includegraphics[scale=0.6]{table7.png} % Adjust scale as needed
+  \caption{Odds Ratios and Confidence Intervals for Education Variables}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Educational Impact on Inequality Acceptance: A Broader Perspective}
+  \begin{itemize}
+    \item \textbf{Initial Hypothesis:} It was anticipated that higher education correlates with a lesser acceptance of inequality.
+    
+    \item \textbf{Revised Findings:} Empirical data shows that both lower and higher education levels lead to a reduced acceptance of inequality.
+    
+    \item \textbf{Interpretation:} This contradicts the initial assumption, suggesting a universal educational influence on perceptions of inequality, irrespective of the education level.
+    
+    \item \textbf{Conclusion:} The findings highlight the pervasive impact of education on societal attitudes toward income disparity, emphasizing the role of education in shaping collective consciousness about equity.
+  \end{itemize}
+\end{frame}
+
+
+
+
+\end{document}
+```
+
